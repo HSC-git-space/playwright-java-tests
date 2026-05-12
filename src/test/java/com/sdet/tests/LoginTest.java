@@ -3,7 +3,9 @@ package com.sdet.tests;
 import com.sdet.base.BaseTest;
 import com.sdet.pages.LoginPage;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+import org.testng.annotations.DataProvider;
 
 public class LoginTest extends BaseTest {
 
@@ -21,5 +23,22 @@ public class LoginTest extends BaseTest {
         loginPage.login("invalid_user", "wrong_password");
         Assert.assertTrue(loginPage.getErrorMessage().contains("Username and password do not match"),
                 "Error message not displayed for invalid login");
+    }
+    @DataProvider(name = "invalidCredentials")
+    public Object[][] invalidCredentials() {
+        return new Object[][] {
+                {"invalid_user", "secret_sauce"},
+                {"standard_user", "wrong_password"},
+                {"", ""},
+        };
+    }
+
+    @Test(dataProvider = "invalidCredentials")
+    public void invalidLoginDataDrivenTest(String username, String password) {
+        LoginPage loginPage = new LoginPage(page);
+        loginPage.navigate();
+        loginPage.login(username, password);
+        Assert.assertTrue(loginPage.getErrorMessage().contains("Epic sadface"),
+                "Error message not shown for: " + username);
     }
 }
