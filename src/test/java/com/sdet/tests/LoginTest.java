@@ -14,4 +14,12 @@ public class LoginTest extends BaseTest {
         loginPage.login("standard_user", "secret_sauce");
         Assert.assertTrue(page.url().contains("inventory"), "Login failed — inventory page not loaded");
     }
+    @Test
+    public void invalidLoginTest() {
+        LoginPage loginPage = new LoginPage(page);
+        loginPage.navigate();
+        loginPage.login("invalid_user", "wrong_password");
+        Assert.assertTrue(loginPage.getErrorMessage().contains("Username and password do not match"),
+                "Error message not displayed for invalid login");
+    }
 }
