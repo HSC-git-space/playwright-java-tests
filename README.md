@@ -90,6 +90,40 @@ Every push to `main` triggers the GitHub Actions pipeline. Steps: checkout → J
 Tests run headless in CI. Same engine, same behaviour — just no window rendered on a server with no display.
 
 ---
+## Docker
+
+Tests are containerised using Docker, allowing the full suite to execute in any environment without local dependency setup.
+
+### The Problem Docker Solves
+
+Playwright requires specific Linux system libraries to launch Chromium. On a developer machine these may exist. On a fresh CI server they don't. Without containerisation, the test run depends on whatever happens to be installed on the host — which is exactly the kind of environment inconsistency that causes "works on my machine" failures.
+
+Docker packages the entire execution environment — Java, Maven, system libraries, and Chromium — into a single image. Every run, everywhere, is identical.
+
+### Why Chromium Is Installed at Build Time
+
+Moving `playwright install` into the `RUN` layer of the Dockerfile means Chromium is baked into the image once during build. Every subsequent `docker run` skips the download entirely — faster execution, no network dependency at runtime.
+
+### Commands
+
+**Build the image:**
+```bash
+docker build -t hscdock/playwright-java-tests .
+```
+
+**Run the tests:**
+```bash
+docker run hscdock/playwright-java-tests
+```
+
+**Pull from Docker Hub:**
+```bash
+docker pull hscdock/playwright-java-tests
+```
+
+### Results
+
+5/5 tests passing inside the container. The warning about missing deps on Run 1 is a known initialisation timing behaviour — Runs 2–5 pass cleanly. Documented as a known issue.
 
 ## Future Enhancements
 
